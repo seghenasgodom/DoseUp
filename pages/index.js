@@ -266,3 +266,77 @@ export default function Home() {
     </main>
   );
 }
+// [Everything above remains the same...]
+
+// Add this to the Add Reminder section, inside the form UI
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+  <input
+    type="text"
+    placeholder="Pill Name"
+    value={pillName}
+    onChange={(e) => setPillName(e.target.value)}
+    className="bg-gray-200 dark:bg-neutral-800 border border-neutral-400 dark:border-neutral-600 text-black dark:text-white rounded px-4 py-2"
+  />
+  <input
+    type="time"
+    value={time}
+    onChange={(e) => setTime(e.target.value)}
+    className="bg-gray-200 dark:bg-neutral-800 border border-neutral-400 dark:border-neutral-600 text-black dark:text-white rounded px-4 py-2"
+  />
+  <input
+    type="text"
+    placeholder="Notes or dosage"
+    value={description}
+    onChange={(e) => setDescription(e.target.value)}
+    className="bg-gray-200 dark:bg-neutral-800 border border-neutral-400 dark:border-neutral-600 text-black dark:text-white rounded px-4 py-2"
+  />
+  <select
+    onChange={(e) => setDuration(e.target.value)}
+    className="bg-gray-200 dark:bg-neutral-800 border border-neutral-400 dark:border-neutral-600 text-black dark:text-white rounded px-4 py-2"
+  >
+    <option value="forever">Constant</option>
+    <option value="7">1 Week</option>
+    <option value="14">2 Weeks</option>
+    <option value="21">3 Weeks</option>
+  </select>
+</div>
+
+// Update handleAddReminder
+const handleAddReminder = () => {
+  if (pillName && selectedDays.length > 0) {
+    const color = pillColors[Math.floor(Math.random() * pillColors.length)];
+    const takenPerDay = {};
+    allDays.forEach((day) => (takenPerDay[day] = false));
+    const newReminder = {
+      pillName,
+      time,
+      description,
+      days: selectedDays,
+      color,
+      takenPerDay,
+      created: new Date().toISOString(),
+      duration: duration
+    };
+    setReminders([...reminders, newReminder]);
+    setPillName('');
+    setTime('');
+    setDescription('');
+    setSelectedDays([]);
+    setDuration('forever');
+  }
+};
+
+// Filter expired reminders in rendering sections (e.g. todayReminders, weekly view)
+const isReminderActive = (reminder) => {
+  if (!reminder.duration || reminder.duration === 'forever') return true;
+  const createdDate = new Date(reminder.created);
+  const endDate = new Date(createdDate);
+  endDate.setDate(endDate.getDate() + parseInt(reminder.duration));
+  return new Date() <= endDate;
+};
+
+const todayReminders = reminders.filter((r) => r.days.includes(today) && isReminderActive(r));
+const takenCount = todayReminders.filter((r) => r.takenPerDay[today]).length;
+
+// In weekly view, replace reminders.filter with:
+const dayReminders = reminders.filter((r) => r.days.includes(day) && isReminderActive(r));

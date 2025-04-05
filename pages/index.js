@@ -89,6 +89,7 @@ export default function Home() {
   };
 
   const todayReminders = reminders.filter((r) => r.days.includes(today));
+  const takenCount = todayReminders.filter((r) => r.takenPerDay[today]).length;
 
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white px-4 py-6 font-sans transition relative overflow-hidden">
@@ -104,15 +105,15 @@ export default function Home() {
           <h2 className="text-lg font-semibold">Settings</h2>
           <button onClick={() => setShowSettings(false)}>✖</button>
         </div>
-        <label className="flex items-center gap-3 text-sm">
-          <input
-            type="checkbox"
-            checked={darkMode}
-            onChange={() => setDarkMode(!darkMode)}
-            className="w-4 h-4"
-          />
-          Enable Dark Mode
-        </label>
+        <div className="text-sm">
+          <span className="mr-2">Dark Mode:</span>
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="border px-2 py-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700"
+          >
+            {darkMode ? 'On' : 'Off'}
+          </button>
+        </div>
       </div>
 
       <div className="max-w-xl mx-auto bg-gray-100 dark:bg-neutral-900 shadow-lg rounded-lg p-8 border dark:border-neutral-700 border-gray-200">
@@ -173,7 +174,10 @@ export default function Home() {
         </button>
 
         <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border border-gray-300 dark:border-neutral-700 mb-8">
-          <h2 className="text-lg font-semibold mb-2">Reminders for {today}</h2>
+          <h2 className="text-lg font-semibold mb-2">Daily Reminders</h2>
+          <p className="text-sm mb-2 text-neutral-600 dark:text-neutral-400">
+            {takenCount}/{todayReminders.length} taken today
+          </p>
           {todayReminders.length === 0 ? (
             <p className="text-neutral-500 dark:text-neutral-400">No reminders for today.</p>
           ) : (
@@ -213,18 +217,31 @@ export default function Home() {
           )}
         </div>
 
-        {/* Week Overview */}
+        {/* Weekly Overview Agenda Style */}
         <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border border-gray-300 dark:border-neutral-700">
-          <h2 className="text-lg font-semibold mb-2">Weekly Overview</h2>
-          <ul className="space-y-2 text-sm">
+          <h2 className="text-lg font-semibold mb-4">Weekly Overview</h2>
+          <ul className="space-y-4">
             {allDays.map((day) => {
-              const dayReminders = reminders.filter((r) => r.days.includes(day));
+              const dayReminders = reminders
+                .filter((r) => r.days.includes(day))
+                .sort((a, b) => a.time.localeCompare(b.time));
               return (
                 <li key={day}>
-                  <strong>{day}:</strong>{' '}
-                  {dayReminders.length > 0
-                    ? dayReminders.map((r) => r.pillName).join(', ')
-                    : '—'}
+                  <div className="text-sm font-bold mb-1">{day}</div>
+                  {dayReminders.length === 0 ? (
+                    <p className="text-neutral-400 text-sm">—</p>
+                  ) : (
+                    <ul className="pl-4 border-l-2 border-blue-400 dark:border-blue-600 space-y-2">
+                      {dayReminders.map((r, i) => (
+                        <li key={i} className="relative pl-4">
+                          <span className="absolute left-[-10px] top-1 w-2 h-2 bg-blue-400 dark:bg-blue-600 rounded-full"></span>
+                          <span className="text-sm">
+                            <strong>{r.time}</strong> - {r.pillName}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               );
             })}

@@ -17,6 +17,7 @@ export default function Home() {
   useEffect(() => {
     const saved = localStorage.getItem('doseup-reminders');
     if (saved) setReminders(JSON.parse(saved));
+    document.documentElement.classList.add('dark');
   }, []);
 
   useEffect(() => {
@@ -93,57 +94,61 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-black px-4 py-6 font-sans transition relative overflow-hidden">
+    <main className="min-h-screen bg-black text-white px-4 py-6 font-sans transition relative overflow-hidden">
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
 
-      <div className="max-w-xl mx-auto bg-gray-100 shadow-lg rounded-lg p-8 border border-gray-200">
+      <div className="max-w-xl mx-auto bg-neutral-900 shadow-lg rounded-lg p-8 border border-neutral-700">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold">DoseUp</h1>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-          <input type="text" value={pillName} onChange={(e) => setPillName(e.target.value)} placeholder="Pill Name" className="bg-gray-200 rounded px-4 py-2" />
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-gray-200 rounded px-4 py-2" />
-          <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notes" className="bg-gray-200 rounded px-4 py-2" />
+          <input type="text" value={pillName} onChange={(e) => setPillName(e.target.value)} placeholder="Pill Name" className="bg-neutral-800 border border-neutral-600 text-white rounded px-4 py-2" />
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-neutral-800 border border-neutral-600 text-white rounded px-4 py-2" />
+          <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notes" className="bg-neutral-800 border border-neutral-600 text-white rounded px-4 py-2" />
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
           {allDays.map((day) => (
-            <button key={day} onClick={() => toggleDay(day)} className={`px-3 py-1 rounded-full border ${selectedDays.includes(day) ? 'bg-blue-500 text-white' : 'border-gray-400'}`}>{day}</button>
+            <button key={day} onClick={() => toggleDay(day)} className={`px-3 py-1 rounded-full border text-sm ${selectedDays.includes(day) ? 'bg-blue-500 text-white border-blue-500' : 'bg-transparent text-neutral-400 border-neutral-600'}`}>{day}</button>
           ))}
         </div>
 
-        <button onClick={handleAddReminder} className="w-full bg-black text-white px-4 py-2 rounded mb-6">
+        <button onClick={handleAddReminder} className="w-full bg-white text-black px-4 py-2 rounded font-semibold hover:opacity-80 transition mb-6">
           Add
         </button>
 
-        <div className="mb-6">
+        <div className="bg-neutral-800 p-4 rounded border border-neutral-700 mb-8">
           <h2 className="text-lg font-semibold mb-2">Daily Reminders</h2>
-          <p className="text-sm mb-2 text-neutral-600">
+          <p className="text-sm mb-2 text-neutral-400">
             {takenCount}/{todayReminders.length} taken today
           </p>
-          <ul className="space-y-2">
-            {todayReminders.map((reminder, index) => (
-              <li key={index} className="bg-white border rounded p-3 flex justify-between items-center">
-                <div>
-                  <strong className={reminder.color}>{reminder.pillName}</strong> {reminder.time && `at ${reminder.time}`}
-                  {reminder.description && <p className="text-sm">{reminder.description}</p>}
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <button onClick={() => handleDelete(index)} className="text-black hover:text-red-400 text-sm">✖</button>
-                  <label className="text-xs flex items-center gap-1">
-                    <input type="checkbox" checked={reminder.takenPerDay[today]} onChange={() => toggleTaken(index)} className="accent-black" />
-                    Taken
-                  </label>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {todayReminders.length === 0 ? (
+            <p className="text-neutral-400">No reminders for today.</p>
+          ) : (
+            <ul className="space-y-2">
+              {todayReminders.map((reminder, index) => (
+                <li key={index} className="bg-neutral-900 border border-neutral-700 rounded p-3 flex justify-between items-center">
+                  <div className={`${reminder.takenPerDay[today] ? 'opacity-50 line-through' : ''}`}>
+                    <strong className={`${reminder.color}`}>{reminder.pillName}</strong> {reminder.time && `at ${reminder.time}`}
+                    {reminder.description && <p className="text-sm text-neutral-400">{reminder.description}</p>}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <button onClick={() => handleDelete(index)} className="text-white hover:text-red-400 text-sm">✖</button>
+                    <label className="text-xs flex items-center gap-1">
+                      <input type="checkbox" checked={reminder.takenPerDay[today]} onChange={() => toggleTaken(index)} className="accent-white" />
+                      Taken
+                    </label>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div className="bg-gray-100 p-4 rounded border">
+        <div className="bg-neutral-800 p-4 rounded border border-neutral-700">
           <h2 className="text-lg font-semibold mb-1">{new Date().toLocaleString('en-US', { month: 'long' })}</h2>
-          <p className="text-sm text-neutral-500 mb-4">Weekly Overview</p>
+          <p className="text-sm text-neutral-400 mb-4">Weekly Overview</p>
           <ul className="space-y-4">
             {getWeekDates().map(({ day, date }) => {
               const formattedDate = `${day} ${date.getDate()}`;
@@ -160,7 +165,7 @@ export default function Home() {
                     <ul className="pl-4 space-y-2">
                       {dayReminders.map((r, i) => (
                         <li key={i} className="relative pl-4">
-                          <span className="absolute left-0 top-1 text-black">-</span>
+                          <span className="absolute left-0 top-1 text-white">-</span>
                           <span className="ml-4 text-sm">
                             <strong>{r.time}</strong> - {r.pillName}
                           </span>

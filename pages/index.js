@@ -33,7 +33,11 @@ export default function Home() {
 
   useEffect(() => {
     localStorage.setItem('doseup-theme', darkMode ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark', darkMode);
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [darkMode]);
 
   const pillColors = [
@@ -106,13 +110,23 @@ export default function Home() {
           <button onClick={() => setShowSettings(false)}>✖</button>
         </div>
         <div className="text-sm">
-          <span className="mr-2">Dark Mode:</span>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="border px-2 py-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700"
-          >
-            {darkMode ? 'On' : 'Off'}
-          </button>
+          <label className="flex items-center cursor-pointer">
+            <div className="mr-3">Dark Mode:</div>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={darkMode}
+                onChange={() => setDarkMode(!darkMode)}
+                className="sr-only"
+              />
+              <div className="block bg-gray-600 w-10 h-6 rounded-full"></div>
+              <div
+                className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition ${
+                  darkMode ? 'translate-x-full' : ''
+                }`}
+              ></div>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -198,15 +212,16 @@ export default function Home() {
                   <div className="flex flex-col items-end gap-1">
                     <button
                       onClick={() => handleDelete(index)}
-                      className="text-red-400 hover:text-red-600 text-sm"
+                      className="text-white hover:text-red-400 text-sm"
                     >
-                      🗑️
+                      ✖
                     </button>
                     <label className="text-xs flex items-center gap-1">
                       <input
                         type="checkbox"
                         checked={reminder.takenPerDay[today]}
                         onChange={() => toggleTaken(index)}
+                        className="accent-white"
                       />
                       Taken
                     </label>
@@ -231,10 +246,10 @@ export default function Home() {
                   {dayReminders.length === 0 ? (
                     <p className="text-neutral-400 text-sm">—</p>
                   ) : (
-                    <ul className="pl-4 border-l-2 border-blue-400 dark:border-blue-600 space-y-2">
+                    <ul className="pl-4 border-l-2 border-white dark:border-white space-y-2">
                       {dayReminders.map((r, i) => (
                         <li key={i} className="relative pl-4">
-                          <span className="absolute left-[-10px] top-1 w-2 h-2 bg-blue-400 dark:bg-blue-600 rounded-full"></span>
+                          <span className="absolute left-[-10px] top-1 w-2 h-2 bg-white dark:bg-white rounded-full"></span>
                           <span className="text-sm">
                             <strong>{r.time}</strong> - {r.pillName}
                           </span>

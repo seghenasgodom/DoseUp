@@ -120,9 +120,9 @@ export default function Home() {
           <h1 className="text-3xl font-bold">DoseUp</h1>
           <button
             onClick={() => setShowSettings(true)}
-            className="text-sm border border-neutral-500 rounded px-3 py-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition"
+            className="text-lg border border-neutral-500 rounded px-3 py-1 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition"
           >
-            ⚙️ Settings
+            ⚙️
           </button>
         </div>
 
@@ -172,7 +172,7 @@ export default function Home() {
           Add
         </button>
 
-        <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border border-gray-300 dark:border-neutral-700">
+        <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border border-gray-300 dark:border-neutral-700 mb-8">
           <h2 className="text-lg font-semibold mb-2">Reminders for {today}</h2>
           {todayReminders.length === 0 ? (
             <p className="text-neutral-500 dark:text-neutral-400">No reminders for today.</p>
@@ -211,6 +211,24 @@ export default function Home() {
               ))}
             </ul>
           )}
+        </div>
+
+        {/* Week Overview */}
+        <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border border-gray-300 dark:border-neutral-700">
+          <h2 className="text-lg font-semibold mb-2">Weekly Overview</h2>
+          <ul className="space-y-2 text-sm">
+            {allDays.map((day) => {
+              const dayReminders = reminders.filter((r) => r.days.includes(day));
+              return (
+                <li key={day}>
+                  <strong>{day}:</strong>{' '}
+                  {dayReminders.length > 0
+                    ? dayReminders.map((r) => r.pillName).join(', ')
+                    : '—'}
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     </main>

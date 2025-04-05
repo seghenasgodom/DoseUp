@@ -5,7 +5,8 @@ export default function Home() {
   const [pillName, setPillName] = useState('');
   const [time, setTime] = useState('');
   const [description, setDescription] = useState('');
-  const [duration, setDuration] = useState('forever');
+  const [durationValue, setDurationValue] = useState('');
+  const [durationUnit, setDurationUnit] = useState('days');
   const [reminders, setReminders] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -49,6 +50,11 @@ export default function Home() {
     );
   };
 
+  const calculateDurationDays = () => {
+    const value = parseInt(durationValue) || 0;
+    return durationUnit === 'weeks' ? value * 7 : value;
+  };
+
   const isReminderActive = (reminder) => {
     if (!reminder.duration || reminder.duration === 'forever') return true;
     const createdDate = new Date(reminder.created);
@@ -62,6 +68,7 @@ export default function Home() {
       const color = pillColors[Math.floor(Math.random() * pillColors.length)];
       const takenPerDay = {};
       allDays.forEach((day) => (takenPerDay[day] = false));
+      const duration = durationValue ? calculateDurationDays() : 'forever';
       const newReminder = {
         pillName,
         time,
@@ -77,7 +84,8 @@ export default function Home() {
       setTime('');
       setDescription('');
       setSelectedDays([]);
-      setDuration('forever');
+      setDurationValue('');
+      setDurationUnit('days');
     }
   };
 
@@ -108,16 +116,26 @@ export default function Home() {
   );
   const takenCount = todayReminders.filter((r) => r.takenPerDay[today]).length;
 
+  const getWeekDates = () => {
+    const startOfWeek = new Date();
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(d.getDate() + i);
+      dates.push({ day: allDays[i], date: d });
+    }
+    return dates;
+  };
+
   return (
     <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white px-4 py-6 font-sans transition relative overflow-hidden">
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
 
       {/* Settings Panel */}
-      <div
-        className={`fixed top-0 right-0 h-full w-64 bg-white dark:bg-neutral-900 border-l border-gray-300 dark:border-neutral-700 p-6 z-50 transform transition-transform duration-300 ${
-          showSettings ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
+      <div className={`fixed top-0 right-0 h-full w-64 bg-white dark:bg-neutral-900 border-l border-gray-300 dark:border-neutral-700 p-6 z-50 transform transition-transform duration-300 ${showSettings ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold">Settings</h2>
           <button onClick={() => setShowSettings(false)}>✖</button>
@@ -144,12 +162,13 @@ export default function Home() {
           <input type="text" value={pillName} onChange={(e) => setPillName(e.target.value)} placeholder="Pill Name" className="bg-gray-200 dark:bg-neutral-800 rounded px-4 py-2" />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-gray-200 dark:bg-neutral-800 rounded px-4 py-2" />
           <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notes" className="bg-gray-200 dark:bg-neutral-800 rounded px-4 py-2" />
-          <select value={duration} onChange={(e) => setDuration(e.target.value)} className="bg-gray-200 dark:bg-neutral-800 rounded px-4 py-2">
-            <option value="forever">Constant</option>
-            <option value="7">1 Week</option>
-            <option value="14">2 Weeks</option>
-            <option value="21">3 Weeks</option>
-          </select>
+          <div className="flex">
+            <input type="number" min="0" value={durationValue} onChange={(e) => setDurationValue(e.target.value)} placeholder="Duration" className="bg-gray-200 dark:bg-neutral-800 rounded-l px-2 py-2 w-1/2" />
+            <select value={durationUnit} onChange={(e) => setDurationUnit(e.target.value)} className="bg-gray-200 dark:bg-neutral-800 rounded-r px-2 py-2 w-1/2">
+              <option value="days">days</option>
+              <option value="weeks">weeks</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
@@ -188,16 +207,11 @@ export default function Home() {
 
         {/* Weekly Overview with Calendar Dates */}
         <div className="bg-gray-100 dark:bg-neutral-800 p-4 rounded border">
-          <h2 className="text-lg font-semibold mb-1">April</h2>
+          <h2 className="text-lg font-semibold mb-1">{new Date().toLocaleString('en-US', { month: 'long' })}</h2>
           <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">Weekly Overview</p>
           <ul className="space-y-4">
-            {allDays.map((day, index) => {
-              const date = new Date();
-              const todayIndex = date.getDay();
-              const adjustedIndex = index === 6 ? 0 : index + 1;
-              const dayDate = new Date();
-              dayDate.setDate(date.getDate() + ((adjustedIndex - todayIndex + 7) % 7));
-              const formattedDate = `${day} ${dayDate.getDate()}`;
+            {getWeekDates().map(({ day, date }) => {
+              const formattedDate = `${day} ${date.getDate()}`;
               const dayReminders = reminders
                 .filter((r) => r.days.includes(day) && isReminderActive(r))
                 .sort((a, b) => a.time.localeCompare(b.time));
@@ -228,4 +242,3 @@ export default function Home() {
     </main>
   );
 }
-
